@@ -1,0 +1,25 @@
+{
+  "name": "nft-sales-twitter-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsgriffin/nft-sales-twitter-bot.git"
+  },
+  "author": "Daniel Griffin (@dsgriffin)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dsgriffin/nft-sales-twitter-bot/issues"
+  },
+  "homepage": "https://github.com/dsgriffin/nft-sales-twitter-bot#readme",
+  "dependencies": {
+    "@alch/alchemy-web3": "^1.1.9",
+    "axios": "^0.24.0",
+    "lodash": "^4.17.21",
+    "twit": "^2.2.11"
+  }
+}
