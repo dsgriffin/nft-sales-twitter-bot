@@ -1,7 +1,7 @@
 const markets = {
     // OpenSea Contract Address
     '0x7be8076f4ea4a4ad08075c2508e481d6c946d12b' : {
-        'name': 'OpenSea',
+        'name': 'OpenSea 🌊',
         'site': 'https://opensea.io/assets/',
         'logDecoder': [{
             type: 'bytes32',
@@ -16,7 +16,7 @@ const markets = {
     },
     // LooksRareExchange Contract Address
     '0x59728544b08ab483533076417fbbb2fd0b17ce3a' : {
-        'name': 'LooksRare',
+        'name': 'LooksRare 👀💎',
         'site': 'https://looksrare.org/collections/',
         'logDecoder': [{
             type: 'bytes32',

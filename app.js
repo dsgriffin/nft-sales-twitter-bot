@@ -77,12 +77,12 @@ async function monitorContract() {
             // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
             if (tokens.length > 1) {
                 tweet(`
-                ${_.get(tokenData, 'assetName', `#` + tokens[0])} & other assets bought for ${totalPrice} ${currency.name} at ${market.name}
+                ${_.get(tokenData, 'assetName', `#` + tokens[0])} & other assets bought for ${totalPrice} ${currency.name} on ${market.name}
 
                 tx: https://etherscan.io/tx/${data.transactionHash}
                 `);
             } else {
-                tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} bought for ${totalPrice} ${currency.name} at ${market.name} ${market.site}${process.env.CONTRACT_ADDRESS}/${tokens[0]}`);
+                tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} bought for ${totalPrice} ${currency.name} on ${market.name} ${market.site}${process.env.CONTRACT_ADDRESS}/${tokens[0]}`);
             }
         })
         .on('changed', (event) => {
