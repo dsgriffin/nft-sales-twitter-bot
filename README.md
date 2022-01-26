@@ -20,7 +20,7 @@ Eth Address: 0xDCA88f66CEc8972D23DE7d5e69c40E087C92132f
 
 ### - abi.json
 
-- Retrieve the **Contract ABI** for the contract you're looking to monitor, from somewhere like [EtherScan](etherscan.io), in JSON format, and include it in `abi.json`.
+- Retrieve the **Contract ABI** for the contract you're looking to monitor, from somewhere like [EtherScan](https://etherscan.io), in JSON format, and include it in `abi.json`.
 
 ### - Alchemy (or another Web3 service provider e.g. Infura, Moralis)
 
