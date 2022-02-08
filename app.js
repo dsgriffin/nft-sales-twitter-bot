@@ -1,6 +1,7 @@
 // external
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const axios = require('axios');
+const { ethers } = require('ethers');
 const _ = require('lodash');
 // local
 const { markets } = require('./markets.js');
@@ -12,6 +13,9 @@ const abi = require('./abi.json');
 // connect to Alchemy websocket
 const web3 = createAlchemyWeb3(`wss://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`);
 
+// sometimes web3.js can return duplicate transactions in a split second, so
+let lastTransactionHash;
+
 async function monitorContract() {
     const contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
 
@@ -20,7 +24,16 @@ async function monitorContract() {
             console.log(subscriptionId);
         })
         .on('data', async (data) => {
-            const receipt = await web3.eth.getTransactionReceipt(data.transactionHash);
+            const transactionHash = data.transactionHash.toLowerCase();
+
+            // duplicate transaction - skip process
+            if (transactionHash == lastTransactionHash) {
+                return;
+            }
+
+            lastTransactionHash = transactionHash;
+
+            const receipt = await web3.eth.getTransactionReceipt(transactionHash);
 
             const recipient = receipt.to.toLowerCase();
 
@@ -60,9 +73,12 @@ async function monitorContract() {
                 if (logAddress == recipient && saleEventTypes.includes(log.topics[0])) {
                     const decodedLogData = web3.eth.abi.decodeLog(market.logDecoder, log.data, []);
 
-                    totalPrice = web3.utils.fromWei(decodedLogData.price);
+                    totalPrice = ethers.utils.formatUnits(decodedLogData.price, currency.decimals);
                 }
             }
+
+            // remove any dupes
+            tokens = _.uniq(tokens);
 
             // custom - don't post sales below a currencies manually set threshold
             // if (Number(totalPrice) < currency.threshold) {
@@ -75,12 +91,9 @@ async function monitorContract() {
             const tokenData = await getTokenData(tokens[0]);
 
             // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
+            // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
             if (tokens.length > 1) {
-                tweet(`
-                ${_.get(tokenData, 'assetName', `#` + tokens[0])} & other assets bought for ${totalPrice} ${currency.name} on ${market.name}
-
-                tx: https://etherscan.io/tx/${data.transactionHash}
-                `);
+                tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} & other assets bought for ${totalPrice} ${currency.name} on ${market.name} https://etherscan.io/tx/${transactionHash}`);
             } else {
                 tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} bought for ${totalPrice} ${currency.name} on ${market.name} ${market.site}${process.env.CONTRACT_ADDRESS}/${tokens[0]}`);
             }
@@ -111,7 +124,12 @@ async function getTokenData(tokenId) {
             'assetName': _.get(data, 'name')
         };
     } catch (error) {
-        console.error(error);
+        if (error.response) {
+            console.log(error.response.data);
+            console.log(error.response.status);
+        } else {
+            console.error(error.message);
+        }
     }
 }
 
