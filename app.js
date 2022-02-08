@@ -91,7 +91,6 @@ async function monitorContract() {
             const tokenData = await getTokenData(tokens[0]);
 
             // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
-            // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
             if (tokens.length > 1) {
                 tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} & other assets bought for ${totalPrice} ${currency.name} on ${market.name} https://etherscan.io/tx/${transactionHash}`);
             } else {
