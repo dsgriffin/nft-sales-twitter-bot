@@ -1,7 +1,8 @@
 // external
-const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const { createAlchemyWeb3 } = require('@alch/alchemy-web3');
 const axios = require('axios');
 const { ethers } = require('ethers');
+const retry = require('async-retry');
 const _ = require('lodash');
 // local
 const { markets } = require('./markets.js');
@@ -11,125 +12,168 @@ const { tweet } = require('./tweet');
 const abi = require('./abi.json');
 
 // connect to Alchemy websocket
-const web3 = createAlchemyWeb3(`wss://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`);
+const web3 = createAlchemyWeb3(
+  `wss://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`
+);
 
 // sometimes web3.js can return duplicate transactions in a split second, so
 let lastTransactionHash;
 
 async function monitorContract() {
-    const contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
+  const contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
 
-    contract.events.Transfer({})
-        .on('connected', (subscriptionId) => {
-            console.log(subscriptionId);
-        })
-        .on('data', async (data) => {
-            const transactionHash = data.transactionHash.toLowerCase();
+  contract.events
+    .Transfer({})
+    .on('connected', (subscriptionId) => {
+      console.log(subscriptionId);
+    })
+    .on('data', async (data) => {
+      const transactionHash = data.transactionHash.toLowerCase();
 
-            // duplicate transaction - skip process
-            if (transactionHash == lastTransactionHash) {
-                return;
-            }
+      // duplicate transaction - skip process
+      if (transactionHash == lastTransactionHash) {
+        return;
+      }
 
-            lastTransactionHash = transactionHash;
+      lastTransactionHash = transactionHash;
 
-            const receipt = await web3.eth.getTransactionReceipt(transactionHash);
+      // attempt to retrieve the receipt, sometimes not available straight away
+      const receipt = await retry(
+        async (bail) => {
+          const rec = await web3.eth.getTransactionReceipt(transactionHash);
 
-            const recipient = receipt.to.toLowerCase();
+          if (rec == null) {
+            throw new Error('receipt not found, try again');
+          }
 
-            // not a marketplace transaction transfer, skip
-            if (!(recipient in markets)) {
-                return;
-            }
+          return rec;
+        },
+        {
+          retries: 5,
+        }
+      );
 
-            // retrieve market details
-            const market = _.get(markets, recipient);
+      const recipient = receipt.to.toLowerCase();
 
-            // default to eth, see currencies.js for currently support currencies
-            let currency = {
-                'name': 'ETH',
-                'decimals': 18,
-                'threshold': 1
-            };
-            let tokens = [];
-            let totalPrice;
+      // not a marketplace transaction transfer, skip
+      if (!(recipient in markets)) {
+        return;
+      }
 
-            for (let log of receipt.logs) {
-                const logAddress = log.address.toLowerCase();
+      // retrieve market details
+      const market = _.get(markets, recipient);
 
-                // if non-ETH transaction
-                if (logAddress in currencies) {
-                    currency = currencies[logAddress];
-                }
+      // default to eth, see currencies.js for currently support currencies
+      let currency = {
+        name: 'ETH',
+        decimals: 18,
+        threshold: 1,
+      };
+      let tokens = [];
+      let totalPrice;
 
-                // token(s) part of the transaction
-                if (log.data == "0x" && transferEventTypes.includes(log.topics[0])) {
-                    const tokenId = web3.utils.hexToNumberString(log.topics[3]);
+      for (let log of receipt.logs) {
+        const logAddress = log.address.toLowerCase();
 
-                    tokens.push(tokenId);
-                }
+        // if non-ETH transaction
+        if (logAddress in currencies) {
+          currency = currencies[logAddress];
+        }
 
-                // transaction log - decode log in correct format depending on market & retrieve price
-                if (logAddress == recipient && saleEventTypes.includes(log.topics[0])) {
-                    const decodedLogData = web3.eth.abi.decodeLog(market.logDecoder, log.data, []);
+        // token(s) part of the transaction
+        if (log.data == '0x' && transferEventTypes.includes(log.topics[0])) {
+          const tokenId = web3.utils.hexToNumberString(log.topics[3]);
 
-                    totalPrice = ethers.utils.formatUnits(decodedLogData.price, currency.decimals);
-                }
-            }
+          tokens.push(tokenId);
+        }
 
-            // remove any dupes
-            tokens = _.uniq(tokens);
+        // transaction log - decode log in correct format depending on market & retrieve price
+        if (logAddress == recipient && saleEventTypes.includes(log.topics[0])) {
+          const decodedLogData = web3.eth.abi.decodeLog(
+            market.logDecoder,
+            log.data,
+            []
+          );
 
-            // custom - don't post sales below a currencies manually set threshold
-            // if (Number(totalPrice) < currency.threshold) {
-            //     console.log(`Sale under ${currency.threshold}: Token ID: ${tokens[0]}, Price: ${totalPrice}`);
+          totalPrice = ethers.utils.formatUnits(
+            decodedLogData.price,
+            currency.decimals
+          );
+        }
+      }
 
-            //     return;
-            // }
+      // remove any dupes
+      tokens = _.uniq(tokens);
 
-            // retrieve metadata for the first (or only) ERC21 asset sold
-            const tokenData = await getTokenData(tokens[0]);
+      // custom - don't post sales below a currencies manually set threshold
+      // if (Number(totalPrice) < currency.threshold) {
+      //     console.log(`Sale under ${currency.threshold}: Token ID: ${tokens[0]}, Price: ${totalPrice}`);
 
-            // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
-            if (tokens.length > 1) {
-                tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} & other assets bought for ${totalPrice} ${currency.name} on ${market.name} https://etherscan.io/tx/${transactionHash}`);
-            } else {
-                tweet(`${_.get(tokenData, 'assetName', `#` + tokens[0])} bought for ${totalPrice} ${currency.name} on ${market.name} ${market.site}${process.env.CONTRACT_ADDRESS}/${tokens[0]}`);
-            }
-        })
-        .on('changed', (event) => {
-            console.log('change');
-        })
-        .on('error', (error, receipt) => {
-            // if the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
-            console.error(error);
-            console.error(receipt);
-        });
+      //     return;
+      // }
+
+      // retrieve metadata for the first (or only) ERC21 asset sold
+      const tokenData = await getTokenData(tokens[0]);
+
+      // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
+      if (tokens.length > 1) {
+        tweet(
+          `${_.get(
+            tokenData,
+            'assetName',
+            `#` + tokens[0]
+          )} & other assets bought for ${totalPrice} ${currency.name} on ${
+            market.name
+          } https://etherscan.io/tx/${transactionHash}`
+        );
+      } else {
+        tweet(
+          `${_.get(
+            tokenData,
+            'assetName',
+            `#` + tokens[0]
+          )} bought for ${totalPrice} ${currency.name} on ${market.name} ${
+            market.site
+          }${process.env.CONTRACT_ADDRESS}/${tokens[0]}`
+        );
+      }
+    })
+    .on('changed', (event) => {
+      console.log('change');
+    })
+    .on('error', (error, receipt) => {
+      // if the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+      console.error(error);
+      console.error(receipt);
+    });
 }
 
 async function getTokenData(tokenId) {
-    try {
-        // retrieve metadata for asset from opensea
-        const response = await axios.get(`https://api.opensea.io/api/v1/asset/${process.env.CONTRACT_ADDRESS}/${tokenId}`, {
-            headers: {
-                'X-API-KEY': process.env.X_API_KEY
-            }
-        });
+  try {
+    // retrieve metadata for asset from opensea
+    const response = await axios.get(
+      `https://api.opensea.io/api/v1/asset/${process.env.CONTRACT_ADDRESS}/${tokenId}`,
+      {
+        headers: {
+          'X-API-KEY': process.env.X_API_KEY,
+        },
+      }
+    );
 
-        const data = response.data;
+    const data = response.data;
 
-        // just the asset name for now, but retrieve whatever you need
-        return {
-            'assetName': _.get(data, 'name')
-        };
-    } catch (error) {
-        if (error.response) {
-            console.log(error.response.data);
-            console.log(error.response.status);
-        } else {
-            console.error(error.message);
-        }
+    // just the asset name for now, but retrieve whatever you need
+    return {
+      assetName: _.get(data, 'name'),
+    };
+  } catch (error) {
+    if (error.response) {
+      console.log(error.response.data);
+      console.log(error.response.status);
+    } else {
+      console.error(error.message);
     }
+  }
 }
 
 // initate websocket connection
