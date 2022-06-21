@@ -121,10 +121,10 @@ async function monitorContract() {
                 )
               );
 
-              decodedLogData.price = totalPrice;
-
               startOffset = endOffset;
             }
+
+            decodedLogData.price = totalPrice;
           }
 
           totalPrice = ethers.utils.formatUnits(
