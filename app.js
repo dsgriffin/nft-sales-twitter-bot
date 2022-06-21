@@ -1,15 +1,15 @@
 // external
-const { createAlchemyWeb3 } = require('@alch/alchemy-web3');
-const axios = require('axios');
-const { ethers } = require('ethers');
-const retry = require('async-retry');
-const _ = require('lodash');
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const axios = require("axios");
+const { ethers } = require("ethers");
+const retry = require("async-retry");
+const _ = require("lodash");
 // local
-const { markets } = require('./markets.js');
-const { currencies } = require('./currencies.js');
-const { transferEventTypes, saleEventTypes } = require('./log_event_types.js');
-const { tweet } = require('./tweet');
-const abi = require('./abi.json');
+const { markets } = require("./markets.js");
+const { currencies } = require("./currencies.js");
+const { transferEventTypes, saleEventTypes } = require("./log_event_types.js");
+const { tweet } = require("./tweet");
+const abi = require("./abi.json");
 
 // connect to Alchemy websocket
 const web3 = createAlchemyWeb3(
@@ -24,10 +24,10 @@ async function monitorContract() {
 
   contract.events
     .Transfer({})
-    .on('connected', (subscriptionId) => {
+    .on("connected", (subscriptionId) => {
       console.log(subscriptionId);
     })
-    .on('data', async (data) => {
+    .on("data", async (data) => {
       const transactionHash = data.transactionHash.toLowerCase();
 
       // duplicate transaction - skip process
@@ -43,7 +43,7 @@ async function monitorContract() {
           const rec = await web3.eth.getTransactionReceipt(transactionHash);
 
           if (rec == null) {
-            throw new Error('receipt not found, try again');
+            throw new Error("receipt not found, try again");
           }
 
           return rec;
@@ -65,12 +65,12 @@ async function monitorContract() {
 
       // default to eth, see currencies.js for currently support currencies
       let currency = {
-        name: 'ETH',
+        name: "ETH",
         decimals: 18,
         threshold: 1,
       };
       let tokens = [];
-      let totalPrice;
+      let totalPrice = ethers.BigNumber.from("0");
 
       for (let log of receipt.logs) {
         const logAddress = log.address.toLowerCase();
@@ -81,7 +81,7 @@ async function monitorContract() {
         }
 
         // token(s) part of the transaction
-        if (log.data == '0x' && transferEventTypes.includes(log.topics[0])) {
+        if (log.data == "0x" && transferEventTypes.includes(log.topics[0])) {
           const tokenId = web3.utils.hexToNumberString(log.topics[3]);
 
           tokens.push(tokenId);
@@ -94,6 +94,38 @@ async function monitorContract() {
             log.data,
             []
           );
+
+          if (market.name.includes("Seaport")) {
+            let startOffset = ethers.BigNumber.from("0x140");
+
+            for (
+              let i = ethers.BigNumber.from("1");
+              i.lte(decodedLogData.offerConsiderationLength);
+              i = i.add(1)
+            ) {
+              let endOffset = startOffset.add(ethers.BigNumber.from("0xa0"));
+
+              let considerationLogData = ethers.utils.hexDataSlice(
+                log.data,
+                startOffset.toHexString(),
+                endOffset.toHexString()
+              );
+
+              totalPrice = totalPrice.add(
+                ethers.BigNumber.from(
+                  ethers.utils.hexDataSlice(
+                    considerationLogData,
+                    "0x60",
+                    "0x80"
+                  )
+                )
+              );
+
+              decodedLogData.price = totalPrice;
+
+              startOffset = endOffset;
+            }
+          }
 
           totalPrice = ethers.utils.formatUnits(
             decodedLogData.price,
@@ -120,7 +152,7 @@ async function monitorContract() {
         tweet(
           `${_.get(
             tokenData,
-            'assetName',
+            "assetName",
             `#` + tokens[0]
           )} & other assets bought for ${totalPrice} ${currency.name} on ${
             market.name
@@ -130,7 +162,7 @@ async function monitorContract() {
         tweet(
           `${_.get(
             tokenData,
-            'assetName',
+            "assetName",
             `#` + tokens[0]
           )} bought for ${totalPrice} ${currency.name} on ${market.name} ${
             market.site
@@ -138,10 +170,10 @@ async function monitorContract() {
         );
       }
     })
-    .on('changed', (event) => {
-      console.log('change');
+    .on("changed", (event) => {
+      console.log("change");
     })
-    .on('error', (error, receipt) => {
+    .on("error", (error, receipt) => {
       // if the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       console.error(error);
       console.error(receipt);
@@ -155,7 +187,7 @@ async function getTokenData(tokenId) {
       `https://api.opensea.io/api/v1/asset/${process.env.CONTRACT_ADDRESS}/${tokenId}`,
       {
         headers: {
-          'X-API-KEY': process.env.X_API_KEY,
+          "X-API-KEY": process.env.X_API_KEY,
         },
       }
     );
@@ -164,7 +196,7 @@ async function getTokenData(tokenId) {
 
     // just the asset name for now, but retrieve whatever you need
     return {
-      assetName: _.get(data, 'name'),
+      assetName: _.get(data, "name"),
     };
   } catch (error) {
     if (error.response) {
