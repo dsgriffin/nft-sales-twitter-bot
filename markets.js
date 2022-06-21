@@ -28,8 +28,7 @@ const markets = {
         name: "purchaser",
         type: "address",
       },
-      {
-       
+      {       
         name: "offerOffset",
         type: "uint256",
       },
