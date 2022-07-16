@@ -65,6 +65,10 @@ heroku ps:scale worker=1
 
 In `app.js`, you'll notice there's some commented out logic for only posting sales above a certain `threshold` that you can modify per-currency in `currencies.js`.
 
+## Credits
+
+[Kenryu42](https://github.com/kenryu42) for their help on adding seaport support
+
 ## License 📃
 
 This code is licensed under the [ISC License](https://choosealicense.com/licenses/isc/).

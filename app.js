@@ -1,11 +1,11 @@
 // external
 const { createAlchemyWeb3 } = require('@alch/alchemy-web3');
-const axios = require('axios');
 const { ethers } = require('ethers');
 const retry = require('async-retry');
 const _ = require('lodash');
 // local
 const { markets } = require('./markets.js');
+const { getTokenData, getSeaportSalePrice } = require('./utils.js');
 const { currencies } = require('./currencies.js');
 const { transferEventTypes, saleEventTypes } = require('./log_event_types.js');
 const { tweet } = require('./tweet');
@@ -95,10 +95,19 @@ async function monitorContract() {
             []
           );
 
-          totalPrice = ethers.utils.formatUnits(
-            decodedLogData.price,
-            currency.decimals
-          );
+          if (market.name == 'Opensea ⚓️') {
+            totalPrice = getSeaportSalePrice(decodedLogData);
+          } else if (market.name == 'X2Y2 ⭕️') {
+            totalPrice = ethers.utils.formatUnits(
+              decodedLogData.amount,
+              currency.decimals
+            );
+          } else {
+            totalPrice = ethers.utils.formatUnits(
+              decodedLogData.price,
+              currency.decimals
+            );
+          }
         }
       }
 
@@ -146,34 +155,6 @@ async function monitorContract() {
       console.error(error);
       console.error(receipt);
     });
-}
-
-async function getTokenData(tokenId) {
-  try {
-    // retrieve metadata for asset from opensea
-    const response = await axios.get(
-      `https://api.opensea.io/api/v1/asset/${process.env.CONTRACT_ADDRESS}/${tokenId}`,
-      {
-        headers: {
-          'X-API-KEY': process.env.X_API_KEY,
-        },
-      }
-    );
-
-    const data = response.data;
-
-    // just the asset name for now, but retrieve whatever you need
-    return {
-      assetName: _.get(data, 'name'),
-    };
-  } catch (error) {
-    if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-    } else {
-      console.error(error.message);
-    }
-  }
 }
 
 // initate websocket connection
