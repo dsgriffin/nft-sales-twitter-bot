@@ -1,15 +1,15 @@
 // external
-const { createAlchemyWeb3 } = require('@alch/alchemy-web3');
-const { ethers } = require('ethers');
-const retry = require('async-retry');
-const _ = require('lodash');
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const { ethers } = require("ethers");
+const retry = require("async-retry");
+const _ = require("lodash");
 // local
-const { markets } = require('./markets.js');
-const { getTokenData, getSeaportSalePrice } = require('./utils.js');
-const { currencies } = require('./currencies.js');
-const { transferEventTypes, saleEventTypes } = require('./log_event_types.js');
-const { tweet } = require('./tweet');
-const abi = require('./abi.json');
+const { markets } = require("./markets.js");
+const { getTokenData, getSeaportSalePrice } = require("./utils.js");
+const { currencies } = require("./currencies.js");
+const { transferEventTypes, saleEventTypes } = require("./log_event_types.js");
+const { tweet } = require("./tweet");
+const abi = require("./abi.json");
 
 // connect to Alchemy websocket
 const web3 = createAlchemyWeb3(
@@ -24,10 +24,10 @@ async function monitorContract() {
 
   contract.events
     .Transfer({})
-    .on('connected', (subscriptionId) => {
+    .on("connected", (subscriptionId) => {
       console.log(subscriptionId);
     })
-    .on('data', async (data) => {
+    .on("data", async (data) => {
       const transactionHash = data.transactionHash.toLowerCase();
 
       // duplicate transaction - skip process
@@ -43,7 +43,7 @@ async function monitorContract() {
           const rec = await web3.eth.getTransactionReceipt(transactionHash);
 
           if (rec == null) {
-            throw new Error('receipt not found, try again');
+            throw new Error("receipt not found, try again");
           }
 
           return rec;
@@ -65,7 +65,7 @@ async function monitorContract() {
 
       // default to eth, see currencies.js for currently support currencies
       let currency = {
-        name: 'ETH',
+        name: "ETH",
         decimals: 18,
         threshold: 1,
       };
@@ -81,7 +81,7 @@ async function monitorContract() {
         }
 
         // token(s) part of the transaction
-        if (log.data == '0x' && transferEventTypes.includes(log.topics[0])) {
+        if (log.data == "0x" && transferEventTypes.includes(log.topics[0])) {
           const tokenId = web3.utils.hexToNumberString(log.topics[3]);
 
           tokens.push(tokenId);
@@ -95,9 +95,9 @@ async function monitorContract() {
             []
           );
 
-          if (market.name == 'Opensea ⚓️') {
+          if (market.name == "Opensea ⚓️") {
             totalPrice = getSeaportSalePrice(decodedLogData);
-          } else if (market.name == 'X2Y2 ⭕️') {
+          } else if (market.name == "X2Y2 ⭕️") {
             totalPrice = ethers.utils.formatUnits(
               decodedLogData.amount,
               currency.decimals
@@ -129,28 +129,28 @@ async function monitorContract() {
         tweet(
           `${_.get(
             tokenData,
-            'assetName',
+            "assetName",
             `#` + tokens[0]
-          )} & other assets bought for ${totalPrice} ${currency.name} on ${
-            market.name
-          } https://etherscan.io/tx/${transactionHash}`
+          )} & other assets bought for ${totalPrice.toFixed(2)} ${
+            currency.name
+          } on ${market.name} https://etherscan.io/tx/${transactionHash}`
         );
       } else {
         tweet(
           `${_.get(
             tokenData,
-            'assetName',
+            "assetName",
             `#` + tokens[0]
-          )} bought for ${totalPrice} ${currency.name} on ${market.name} ${
-            market.site
-          }${process.env.CONTRACT_ADDRESS}/${tokens[0]}`
+          )} bought for ${totalPrice.toFixed(2)} ${currency.name} on ${
+            market.name
+          } ${market.site}${process.env.CONTRACT_ADDRESS}/${tokens[0]}`
         );
       }
     })
-    .on('changed', (event) => {
-      console.log('change');
+    .on("changed", (event) => {
+      console.log("change");
     })
-    .on('error', (error, receipt) => {
+    .on("error", (error, receipt) => {
       // if the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       console.error(error);
       console.error(receipt);
