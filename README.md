@@ -63,7 +63,15 @@ heroku ps:scale worker=1
 
 ## Modification 🛠
 
-In `app.js`, you'll notice there's some commented out logic for only posting sales above a certain `threshold` that you can modify per-currency in `currencies.js`.
+- In `app.js`, you'll notice there's some commented out logic for only posting sales above a certain `threshold` that you can modify per-currency in `currencies.js`.
+
+- For watching and tweeting multiple collections parallelly add multiple `CONTRACT_ADDRESS`'s to the env and use `abi.json` with different naming conventions and call the `monitorContract` function at the end of `app.js`
+<br />
+for eg: 
+```
+    monitorContract(process.env.CONTRACT_ADDRESS1, abi1);
+    monitorContract(process.env.CONTRACT_ADDRESS1, abi2);
+```
 
 ## Credits
 

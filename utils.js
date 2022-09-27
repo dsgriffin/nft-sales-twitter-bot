@@ -20,13 +20,13 @@ function _reducer(previous, current) {
   }
 }
 
-function getSeaportSalePrice(decodedLogData) {
+function getSeaportSalePrice(CONTRACT_ADDRESS, decodedLogData) {
   const offer = decodedLogData.offer;
   const consideration = decodedLogData.consideration;
 
   const offerSideNfts = offer.some(
     (item) =>
-      item.token.toLowerCase() === process.env.CONTRACT_ADDRESS.toLowerCase()
+      item.token.toLowerCase() === CONTRACT_ADDRESS.toLowerCase()
   );
 
   // if nfts are on the offer side, then consideration is the total price, otherwise the offer is the total price
@@ -41,13 +41,13 @@ function getSeaportSalePrice(decodedLogData) {
   }
 }
 
-async function getTokenData(tokenId) {
+async function getTokenData(CONTRACT_ADDRESS, tokenId) {
   try {
     const assetName = await retry(
       async (bail) => {
         // retrieve metadata for asset from opensea
         const response = await axios.get(
-          `https://api.opensea.io/api/v1/asset/${process.env.CONTRACT_ADDRESS}/${tokenId}`,
+          `https://api.opensea.io/api/v1/asset/${CONTRACT_ADDRESS}/${tokenId}`,
           {
             headers: {
               'X-API-KEY': process.env.X_API_KEY,

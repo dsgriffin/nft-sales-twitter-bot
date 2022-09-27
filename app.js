@@ -19,8 +19,8 @@ const web3 = createAlchemyWeb3(
 // sometimes web3.js can return duplicate transactions in a split second, so
 let lastTransactionHash;
 
-async function monitorContract() {
-  const contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
+async function monitorContract(CONTRACT_ADDRESS, abi) {
+  const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
 
   contract.events
     .Transfer({})
@@ -96,7 +96,7 @@ async function monitorContract() {
           );
 
           if (market.name == 'Opensea ⚓️') {
-            totalPrice = getSeaportSalePrice(decodedLogData);
+            totalPrice = getSeaportSalePrice(CONTRACT_ADDRESS, decodedLogData);
           } else if (market.name == 'X2Y2 ⭕️') {
             totalPrice = ethers.utils.formatUnits(
               decodedLogData.amount,
@@ -122,7 +122,7 @@ async function monitorContract() {
       // }
 
       // retrieve metadata for the first (or only) ERC21 asset sold
-      const tokenData = await getTokenData(tokens[0]);
+      const tokenData = await getTokenData(CONTRACT_ADDRESS, tokens[0]);
 
       // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
       if (tokens.length > 1) {
@@ -158,4 +158,4 @@ async function monitorContract() {
 }
 
 // initate websocket connection
-monitorContract();
+monitorContract(process.env.CONTRACT_ADDRESS, abi);
