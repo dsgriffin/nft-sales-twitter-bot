@@ -70,7 +70,7 @@ async function monitorContract() {
         threshold: 1,
       };
       let tokens = [];
-      let totalPrice;
+      let totalPrice = 0;
 
       for (let log of receipt.logs) {
         const logAddress = log.address.toLowerCase();
@@ -96,14 +96,14 @@ async function monitorContract() {
           );
 
           if (market.name == 'Opensea ⚓️') {
-            totalPrice = getSeaportSalePrice(decodedLogData);
+            totalPrice += getSeaportSalePrice(decodedLogData);
           } else if (market.name == 'X2Y2 ⭕️') {
-            totalPrice = ethers.utils.formatUnits(
+            totalPrice += ethers.utils.formatUnits(
               decodedLogData.amount,
               currency.decimals
             );
           } else {
-            totalPrice = ethers.utils.formatUnits(
+            totalPrice += ethers.utils.formatUnits(
               decodedLogData.price,
               currency.decimals
             );
