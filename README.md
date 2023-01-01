@@ -8,7 +8,7 @@ So, we need to monitor & process Ethereum event logs for ERC-721 token transacti
 
 The aim is to monitor all sales across Ethereum for a given contract. However, different marketplaces can send sale logs in different formats, so we need to process major market logs manually (see `markets.js`).
 
-Right now `Opensea`, `LooksRare` & `X2Y2` marketplaces are integrated, but it should be easy to add others in the future.
+Right now `Opensea`, `LooksRare` & `X2Y2` marketplaces are integrated, but it should be easy to add others in the future..
 
 ## Donations 💵
 
