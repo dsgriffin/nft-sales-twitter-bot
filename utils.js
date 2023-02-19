@@ -10,9 +10,7 @@ function _reducer(previous, current) {
   const currency = currencies[current.token.toLowerCase()];
 
   if (currency !== undefined) {
-    const result =
-      previous +
-      Number(ethers.utils.formatUnits(current.amount, currency.decimals));
+    const result = previous + Number(ethers.utils.formatUnits(current.amount, currency.decimals));
 
     return result;
   } else {
@@ -25,8 +23,7 @@ function getSeaportSalePrice(decodedLogData) {
   const consideration = decodedLogData.consideration;
 
   const offerSideNfts = offer.some(
-    (item) =>
-      item.token.toLowerCase() === process.env.CONTRACT_ADDRESS.toLowerCase()
+    (item) => item.token.toLowerCase() === process.env.CONTRACT_ADDRESS.toLowerCase()
   );
 
   // if nfts are on the offer side, then consideration is the total price, otherwise the offer is the total price
