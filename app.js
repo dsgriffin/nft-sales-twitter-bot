@@ -123,11 +123,11 @@ async function monitorContract() {
     tokens = _.uniq(tokens);
 
     // custom - don't post sales below a currencies manually set threshold
-    if (Number(totalPrice) < 100) {
-        console.log(`Sale under ${currency.threshold}: Token ID: ${tokens[0]}, Price: ${totalPrice}, Market: ${market.name}`);
+    // if (Number(totalPrice) < currency.threshold) {
+    //     console.log(`Sale under ${currency.threshold}: Token ID: ${tokens[0]}, Price: ${totalPrice}, Market: ${market.name}`);
 
-        return;
-    }
+    //     return;
+    // }
 
     // retrieve metadata for the first (or only) ERC21 asset sold
     const tokenData = await getTokenData(tokens[0]);
