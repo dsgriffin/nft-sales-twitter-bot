@@ -4,17 +4,13 @@ This was made to succeed my [Opensea Sales Twitter Bot](https://github.com/dsgri
 
 So, we need to monitor & process Ethereum event logs for ERC-721 token transactions directly, before posting any sales to Twitter.
 
-## Aims 🎯
-
-The aim is to monitor all sales across Ethereum for a given contract. However, different marketplaces can send sale logs in different formats, so we need to process major market logs manually (see `markets.js`).
-
-Right now `Opensea`, `Blur`, `LooksRare` & `X2Y2` marketplaces are integrated, but it should be easy to add others in the future.
+Currently, `Opensea`, `Blur`, `LooksRare` & `X2Y2` are supported.
 
 ## Donations 💵
 
-...are greatly appreciated 🙏
-
 Eth Address: 0xDCA88f66CEc8972D23DE7d5e69c40E087C92132f
+
+Thank you 🙏
 
 ## Setup 🔧
 
@@ -22,7 +18,7 @@ Eth Address: 0xDCA88f66CEc8972D23DE7d5e69c40E087C92132f
 
 - Retrieve the **Contract ABI** for the contract you're looking to monitor, from somewhere like [EtherScan](https://etherscan.io), in JSON format, and include it in `abi.json`.
 
-### - Alchemy (or another Web3 service provider e.g. Infura, Moralis)
+### - Alchemy
 
 - Create an account at [Alchemy.com](https://alchemy.com) & create a new application on Ethereum mainnet. Once you've created a project, you should be able to grab the API key for it
 
@@ -67,7 +63,7 @@ In `app.js`, you'll notice there's some commented out logic for only posting sal
 
 ## Credits
 
-[Kenryu42](https://github.com/kenryu42) for their help on adding seaport support
+[Kenryu42](https://github.com/kenryu42) for their help on adding Seaport support
 
 ## License 📃
 
