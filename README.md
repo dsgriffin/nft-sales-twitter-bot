@@ -22,10 +22,6 @@ Thank you 🙏
 
 - Create an account at [Alchemy.com](https://alchemy.com) & create a new application on Ethereum mainnet. Once you've created a project, you should be able to grab the API key for it
 
-### - OpenSea (or another service with an NFT metadata API, e.g. Moralis, Venly)
-
-- Request an OpenSea API key [here](https://docs.opensea.io/reference/api-overview)
-
 ### - Twitter
 
 - Request a [Twitter Developer Account](https://developer.twitter.com/en/apply-for-access) (with [Elevated Access](https://developer.twitter.com/en/portal/products/elevated), then create a Twitter Developer App (make sure you change it to have both read/write permissions)
@@ -46,7 +42,6 @@ In the Settings section of your Heroku app you'll see a **Config Vars** section.
 - **ACCESS_TOKEN_SECRET** - The Access Token Secret of the Twitter Account your bot is posting from
 - **CONTRACT_ADDRESS** - The contract address you want to monitor sales for
 - **ALCHEMY_API_KEY** - Your unique Alchemy API key
-- **X_API_KEY** - Your unique OpenSea API key
 
 Now you're ready to release - just push up the code via. git to the Heroku remote (see [Heroku Remote](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote) if unsure how).
 
