@@ -1,7 +1,4 @@
 // external
-const axios = require('axios');
-const retry = require('async-retry');
-const _ = require('lodash');
 const { ethers } = require('ethers');
 // local
 const { currencies } = require('./currencies.js');
@@ -35,43 +32,6 @@ function getSeaportSalePrice(decodedLogData) {
     const totalOfferAmount = offer.reduce(_reducer, 0);
 
     return totalOfferAmount;
-  }
-}
-
-async function getTokenData(tokenId) {
-  try {
-    const assetName = await retry(
-      async (bail) => {
-        // retrieve metadata for asset from opensea
-        const response = await axios.get(
-          `https://api.opensea.io/api/v1/asset/${process.env.CONTRACT_ADDRESS}/${tokenId}`,
-          {
-            headers: {
-              'X-API-KEY': process.env.X_API_KEY,
-            },
-          }
-        );
-
-        const data = response.data;
-
-        // just the asset name for now, but retrieve whatever you need
-        return {
-          assetName: _.get(data, 'name'),
-        };
-      },
-      {
-        retries: 5,
-      }
-    );
-
-    return assetName;
-  } catch (error) {
-    if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-    } else {
-      console.error(error.message);
-    }
   }
 }
 

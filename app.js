@@ -5,7 +5,7 @@ const _ = require('lodash');
 const { ethers } = require('ethers');
 // local
 const { markets } = require('./markets.js');
-const { getTokenData, getSeaportSalePrice } = require('./utils.js');
+const { getSeaportSalePrice } = require('./utils.js');
 const { currencies } = require('./currencies.js');
 const { transferEventTypes, saleEventTypes } = require('./log_event_types.js');
 const { tweet } = require('./tweet');
@@ -129,27 +129,23 @@ async function monitorContract() {
     //     return;
     // }
 
-    // retrieve metadata for the first (or only) ERC21 asset sold
-    const tokenData = await getTokenData(tokens[0]);
+    // retrieve metadata for the first (or only) ERC-721 asset sold
+    const metadata = await alchemy.nft.getNftMetadata(
+      process.env.CONTRACT_ADDRESS,
+      tokens[0],
+      {}
+    );
 
     // if more than one asset sold, link directly to etherscan tx, otherwise the marketplace item
     if (tokens.length > 1) {
       tweet(
-        `${_.get(
-          tokenData,
-          'assetName',
-          `#` + tokens[0]
-        )} & other assets bought for ${totalPrice} ${currency.name} on ${
+        `${metadata.title} & other assets bought for ${totalPrice} ${currency.name} on ${
           market.name
         } https://etherscan.io/tx/${transactionHash}`
       );
     } else {
       tweet(
-        `${_.get(
-          tokenData,
-          'assetName',
-          `#` + tokens[0]
-        )} bought for ${totalPrice} ${currency.name} on ${market.name} ${
+        `${metadata.title} bought for ${totalPrice} ${currency.name} on ${market.name} ${
           market.site
         }${process.env.CONTRACT_ADDRESS}/${tokens[0]}`
       );
