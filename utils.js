@@ -37,5 +37,4 @@ function getSeaportSalePrice(decodedLogData) {
 
 module.exports = {
   getSeaportSalePrice: getSeaportSalePrice,
-  getTokenData: getTokenData,
 };
