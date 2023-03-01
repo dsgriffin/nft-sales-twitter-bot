@@ -121,6 +121,9 @@ async function monitorContract() {
 
     // remove any dupes
     tokens = _.uniq(tokens);
+    
+    // format price
+    totalPrice = _.round(totalPrice, 2);
 
     // custom - don't post sales below a currencies manually set threshold
     // if (Number(totalPrice) < currency.threshold) {
