@@ -15,7 +15,7 @@ const markets = {
     site: 'https://looksrare.org/collections/',
   },
   // Opensea - Seaport
-  '0x00000000006c3852cbef3e08e8df289169ede581': {
+  '0x00000000000001ad428e4906ae43d8f9852d0dd6': {
     name: 'Opensea ⚓️',
     site: 'https://opensea.io/assets/',
   }
