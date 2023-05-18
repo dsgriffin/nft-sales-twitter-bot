@@ -17,7 +17,7 @@ const markets = {
   // Opensea - Seaport
   '0x00000000000000adc04c56bf30ac9d3c0aaf14dc': {
     name: 'Opensea ⚓️',
-    site: 'https://opensea.io/assets/',
+    site: 'https://opensea.io/assets/ethereum/',
   }
 };
 
