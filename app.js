@@ -99,19 +99,19 @@ async function monitorContract() {
         })?.args;
 
         if (market?.name == 'Opensea ⚓️') {
-          totalPrice += getSeaportSalePrice(decodedLogData);
+          totalPrice = getSeaportSalePrice(decodedLogData);
         } else if (market.name == 'Blur 🟠') {
-          totalPrice += Number(ethers.utils.formatUnits(
+          totalPrice = Number(ethers.utils.formatUnits(
             decodedLogData.sell.price,
             currency.decimals
           ));
         } else if (market.name == 'X2Y2 ⭕️') {
-          totalPrice += Number(ethers.utils.formatUnits(
+          totalPrice = Number(ethers.utils.formatUnits(
             decodedLogData.amount,
             currency.decimals
           ));
         } else if (market.name == 'LooksRare 👀💎') {
-          totalPrice += Number(ethers.utils.formatUnits(
+          totalPrice = Number(ethers.utils.formatUnits(
             decodedLogData.price,
             currency.decimals
           ));
@@ -123,7 +123,7 @@ async function monitorContract() {
     tokens = _.uniq(tokens);
     
     // format price
-    totalPrice = _.round(totalPrice, 2);
+    totalPrice = _.round(totalPrice * tokens.length, 2);
 
     // custom - don't post sales below a currencies manually set threshold
     // if (Number(totalPrice) < currency.threshold) {
