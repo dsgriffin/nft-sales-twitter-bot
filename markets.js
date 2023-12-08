@@ -15,7 +15,7 @@ const markets = {
     site: 'https://looksrare.org/collections/',
   },
   // Opensea - Seaport 1.5
-  // IMPORTANT: Opensea regularly releases new Seaport versions, you may need to modify this to the last contract often
+  // IMPORTANT: Opensea regularly releases new Seaport versions, you may need to modify this to the latest contract often
   '0x00000000000000adc04c56bf30ac9d3c0aaf14dc': {
     name: 'Opensea ⚓️',
     site: 'https://opensea.io/assets/ethereum/',
