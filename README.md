@@ -8,7 +8,7 @@ Currently, `Opensea`, `Blur`, `LooksRare` & `X2Y2` are supported.
 
 ## Donations 💵
 
-Eth Address: 0xDCA88f66CEc8972D23DE7d5e69c40E087C92132f
+Eth Address: 0x51C96e813e377E1a18B6867F932aE1B7b1600372
 
 Thank you 🙏
 
