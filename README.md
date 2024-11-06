@@ -1,8 +1,8 @@
-# NFT Sales Twitter Bot 🤖
+# NFT Sales X Bot 🤖
 
-This was made to succeed my [Opensea Sales Twitter Bot](https://github.com/dsgriffin/opensea-sales-twitter-bot) repo; while relying on the OpenSea Events API is simpler, it doesn't include any NFT sales happening in other, newer marketplaces.
+This was made to succeed my [Opensea Sales X Bot](https://github.com/dsgriffin/opensea-sales-x-bot) repo; while relying on the OpenSea Events API is simpler, it doesn't include any NFT sales happening in other, newer marketplaces.
 
-So, we need to monitor & process Ethereum event logs for ERC-721 token transactions directly, before posting any sales to Twitter.
+So, we need to monitor & process Ethereum event logs for ERC-721 token transactions directly, before posting any sales to X.
 
 Currently, `Opensea`, `Blur`, `LooksRare` & `X2Y2` are supported.
 
@@ -22,13 +22,13 @@ Thank you 🙏
 
 - Create an account at [Alchemy.com](https://alchemy.com) & create a new application on Ethereum mainnet. Once you've created a project, you should be able to grab the API key for it
 
-### - Twitter
+### - X
 
-- Request a [Twitter Developer Account](https://developer.twitter.com/en/apply-for-access) (with [Elevated Access](https://developer.twitter.com/en/portal/products/elevated), then create a Twitter Developer App (make sure you change it to have both read/write permissions)
+- Ensure you have an [X Developer Account](https://developer.twitter.com/), then create a X Developer App (make sure it has both read/write permissions)
 
-- Make sure you are logged in to the Twitter account you want the bot to run on (as the next step will be authorizing the bot to post on your account)
+- Make sure you are logged in to the X account you want the bot to run on (as the next step will be authorizing the bot to post on your account)
 
-- Install [Twurl](https://github.com/twitter/twurl) and, using your Twitter Developer consumer key & secret, generate the access token & access secret
+- Install [Twurl](https://github.com/twitter/twurl) and, using your X Developer consumer key & secret, generate the access token & access secret
 
 ### - Heroku
 
@@ -36,10 +36,10 @@ Thank you 🙏
 
 In the Settings section of your Heroku app you'll see a **Config Vars** section. Add the following config vars:
 
-- **CONSUMER_KEY** - Your Twitter Developer App's Consumer Key
-- **CONSUMER_SECRET** - Your Twitter Developer App's Consumer Secret
-- **ACCESS_TOKEN_KEY** - The Access Token Key of the Twitter Account your bot is posting from
-- **ACCESS_TOKEN_SECRET** - The Access Token Secret of the Twitter Account your bot is posting from
+- **CONSUMER_KEY** - Your X Developer App's Consumer Key
+- **CONSUMER_SECRET** - Your X Developer App's Consumer Secret
+- **ACCESS_TOKEN_KEY** - The Access Token Key of the X Account your bot is posting from
+- **ACCESS_TOKEN_SECRET** - The Access Token Secret of the X Account your bot is posting from
 - **CONTRACT_ADDRESS** - The contract address you want to monitor sales for
 - **ALCHEMY_API_KEY** - Your unique Alchemy API key
 
